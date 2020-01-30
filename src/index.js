@@ -81,7 +81,8 @@ class Thermostat {
 
   setTargetHeatingCoolingState(value, callback) {
     this.log('setTargetHeatingCoolingState: ', value)
-    // TODO
+    // TODO: set state locally for use in getTargetHeatingCoolingState
+    // TODO: api call
     callback()
   }
 
@@ -93,7 +94,7 @@ class Thermostat {
 
     this.log('getTargetHeatingCoolingState')
     const value = Characteristic.TargetHeatingCoolingState.COOL
-    // TODO
+    // TODO: read from local var (as set in setTargetHeatingCoolingState prior to hitting the api
     callback(null, value)
   }
 

@@ -1,9 +1,16 @@
 import nodeFetch from 'node-fetch'
 
 export default function(url, fetch = nodeFetch) {
-  // TODO: parse url and ensure trailing slash
+  // TODO: parse url and be flexible on trailing slashes, http:// etc. tests!
   // TODO: helper for write actions
   // TODO: helper for read actions
+
+  // TODO:
+  // actions
+  // * getCurrentTemperature (SystemSettings Temp attrib (or null if zero))
+  // * setTargetHeatCoolState (send systemON then SystemMODE)
+  // * getCurrentHeatCoolState (SystemSettings SysMode attrib)
+
   return {
     setUnitSetpoint: value => {
       return fetch(`${url}UnitSetpoint`, {
