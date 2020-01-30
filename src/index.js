@@ -26,6 +26,8 @@ class Thermostat {
 
     this.getActive = this.getActive.bind(this)
     this.setActive = this.setActive.bind(this)
+    this.getRotationSpeed = this.getRotationSpeed.bind(this)
+    this.getRotationSpeed = this.getRotationSpeed.bind(this)
     this.setTargetTemperature = this.setTargetTemperature.bind(this)
     this.getTargetTemperature = this.getTargetTemperature.bind(this)
     this.getCurrentTemperature = this.getCurrentTemperature.bind(this)
@@ -55,6 +57,17 @@ class Thermostat {
 
   setActive(value, callback) {
     this.log('setActive: ', value)
+    callback()
+  }
+
+  getRotationSpeed(callback) {
+    this.log('getRotationSpeed')
+    const value = 66.6
+    callback(null, value)
+  }
+
+  setRotationSpeed(value, callback) {
+    this.log('setRotationSpeed: ', value)
     callback()
   }
 
@@ -156,7 +169,11 @@ class Thermostat {
       .on('get', this.getTargetTemperature.bind(this))
       .on('set', this.setTargetTemperature.bind(this))
 
-    // TODO: Characteristic.RotationSpeed for high/med/low fan speed
+    this.service
+      .getCharacteristic(Characteristic.RotationSpeed)
+      .setProps({ minStep: 33.3 }) // off = 0 | low = 33.3 | med = 66.6 | high = 99.9
+      .on('get', this.getRotationSpeed.bind(this))
+      .on('set', this.setRotationSpeed.bind(this))
 
     // this.service
     //   .getCharacteristic(Characteristic.TemperatureDisplayUnits)
