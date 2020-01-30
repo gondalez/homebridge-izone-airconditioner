@@ -17,23 +17,21 @@ class Thermostat {
     log('constructing')
 
     this.log = log
-    this.service = new Service.Thermostat(config.name)
+    this.service = new Service.HeaterCooler(config.name)
 
     this.config = config
     this.apiClient = api(config.url)
 
     log('config', config)
 
+    this.getActive = this.getActive.bind(this)
+    this.setActive = this.setActive.bind(this)
     this.setTargetTemperature = this.setTargetTemperature.bind(this)
     this.getTargetTemperature = this.getTargetTemperature.bind(this)
     this.getCurrentTemperature = this.getCurrentTemperature.bind(this)
-    this.setTargetHeatingCoolingState = this.setTargetHeatingCoolingState.bind(
-      this
-    )
-    this.getTargetHeatingCoolingState = this.getTargetHeatingCoolingState.bind(
-      this
-    )
-    this.getCurrentHeatingCoolingState = this.getCurrentHeatingCoolingState.bind(
+    this.setTargetHeaterCoolerState = this.setTargetHeaterCoolerState.bind(this)
+    this.getTargetHeaterCoolerState = this.getTargetHeaterCoolerState.bind(this)
+    this.getCurrentHeaterCoolerState = this.getCurrentHeaterCoolerState.bind(
       this
     )
   }
@@ -47,6 +45,17 @@ class Thermostat {
     this.log('getName')
     const value = config.name
     callback(null, value)
+  }
+
+  getActive(callback) {
+    this.log('getActive')
+    const value = true
+    callback(null, value)
+  }
+
+  setActive(value, callback) {
+    this.log('setActive: ', value)
+    callback()
   }
 
   setTargetTemperature(value, callback) {
@@ -66,7 +75,6 @@ class Thermostat {
 
   getTargetTemperature(callback) {
     this.log('getTargetTemperature')
-
     this.apiClient
       .getUnitSetpoint()
       .then(value => callback(null, value))
@@ -79,32 +87,32 @@ class Thermostat {
     callback(null, value)
   }
 
-  setTargetHeatingCoolingState(value, callback) {
-    this.log('setTargetHeatingCoolingState: ', value)
-    // TODO: set state locally for use in getTargetHeatingCoolingState
+  setTargetHeaterCoolerState(value, callback) {
+    this.log('setTargetHeaterCoolerState: ', value)
+    // TODO: set state locally for use in getTargetHeaterCoolerState
     // TODO: api call
     callback()
   }
 
-  getTargetHeatingCoolingState(callback) {
-    // Characteristic.TargetHeatingCoolingState.OFF = 0;
-    // Characteristic.TargetHeatingCoolingState.HEAT = 1;
-    // Characteristic.TargetHeatingCoolingState.COOL = 2;
-    // Characteristic.TargetHeatingCoolingState.AUTO = 3;
+  getTargetHeaterCoolerState(callback) {
+    // Characteristic.TargetHeaterCoolerState.OFF = 0;
+    // Characteristic.TargetHeaterCoolerState.HEAT = 1;
+    // Characteristic.TargetHeaterCoolerState.COOL = 2;
+    // Characteristic.TargetHeaterCoolerState.AUTO = 3;
 
-    this.log('getTargetHeatingCoolingState')
-    const value = Characteristic.TargetHeatingCoolingState.COOL
-    // TODO: read from local var (as set in setTargetHeatingCoolingState prior to hitting the api
+    this.log('getTargetHeaterCoolerState')
+    const value = Characteristic.TargetHeaterCoolerState.COOL
+    // TODO: read from local var (as set in setTargetHeaterCoolerState prior to hitting the api
     callback(null, value)
   }
 
-  getCurrentHeatingCoolingState(callback) {
-    // Characteristic.TargetHeatingCoolingState.OFF = 0;
-    // Characteristic.TargetHeatingCoolingState.HEAT = 1;
-    // Characteristic.TargetHeatingCoolingState.COOL = 2;
+  getCurrentHeaterCoolerState(callback) {
+    // Characteristic.TargetHeaterCoolerState.OFF = 0;
+    // Characteristic.TargetHeaterCoolerState.HEAT = 1;
+    // Characteristic.TargetHeaterCoolerState.COOL = 2;
 
-    this.log('getCurrentHeatingCoolingState')
-    const value = Characteristic.CurrentHeatingCoolingState.COOL
+    this.log('getCurrentHeaterCoolerState')
+    const value = Characteristic.CurrentHeaterCoolerState.COOL
     // TODO
     callback(null, value)
   }
@@ -118,22 +126,37 @@ class Thermostat {
       .setCharacteristic(Characteristic.SerialNumber, this.serial)
 
     this.service
-      .getCharacteristic(Characteristic.CurrentHeatingCoolingState)
-      .on('get', this.getCurrentHeatingCoolingState.bind(this))
+      .getCharacteristic(Characteristic.Active)
+      .on('get', this.getActive.bind(this))
+      .on('set', this.setActive.bind(this))
 
     this.service
-      .getCharacteristic(Characteristic.TargetHeatingCoolingState)
-      .on('get', this.getTargetHeatingCoolingState.bind(this))
-      .on('set', this.setTargetHeatingCoolingState.bind(this))
+      .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+      .on('get', this.getCurrentHeaterCoolerState.bind(this))
+
+    this.service
+      .getCharacteristic(Characteristic.TargetHeaterCoolerState)
+      .on('get', this.getTargetHeaterCoolerState.bind(this))
+      .on('set', this.setTargetHeaterCoolerState.bind(this))
 
     this.service
       .getCharacteristic(Characteristic.CurrentTemperature)
       .on('get', this.getCurrentTemperature.bind(this))
+      .setProps({ minStep: 0.1 })
 
     this.service
-      .getCharacteristic(Characteristic.TargetTemperature)
+      .getCharacteristic(Characteristic.CoolingThresholdTemperature)
+      .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
       .on('get', this.getTargetTemperature.bind(this))
       .on('set', this.setTargetTemperature.bind(this))
+
+    this.service
+      .getCharacteristic(Characteristic.HeatingThresholdTemperature)
+      .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
+      .on('get', this.getTargetTemperature.bind(this))
+      .on('set', this.setTargetTemperature.bind(this))
+
+    // TODO: Characteristic.RotationSpeed for high/med/low fan speed
 
     // this.service
     //   .getCharacteristic(Characteristic.TemperatureDisplayUnits)
@@ -143,16 +166,6 @@ class Thermostat {
     this.service
       .getCharacteristic(Characteristic.Name)
       .on('get', this.getName.bind(this))
-
-    this.service.getCharacteristic(Characteristic.CurrentTemperature).setProps({
-      minStep: 0.1,
-    })
-
-    this.service.getCharacteristic(Characteristic.TargetTemperature).setProps({
-      minValue: 20,
-      maxValue: 30,
-      minStep: 1.0,
-    })
 
     return [this.informationService, this.service]
   }
