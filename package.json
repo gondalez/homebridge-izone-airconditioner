@@ -1,0 +1,31 @@
+{
+  "name": "homebridge-izone-airconditioner",
+  "version": "1.0.0",
+  "description": "Homebridge plugin for the iZone airconditioner controller.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src -d dist",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gondalez/homebridge-izone-airconditioner.git"
+  },
+  "keywords": [
+    "homebridge",
+    "izone",
+    "airconditioner",
+    "thermostat"
+  ],
+  "author": "Tristan Harmer",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gondalez/homebridge-izone-airconditioner/issues"
+  },
+  "homepage": "https://github.com/gondalez/homebridge-izone-airconditioner#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3"
+  }
+}
