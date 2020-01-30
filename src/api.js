@@ -1,6 +1,6 @@
-import fetch from 'node-fetch'
+import nodeFetch from 'node-fetch'
 
-export default function(url) {
+export default function(url, fetch = nodeFetch) {
   // TODO: parse url and ensure trailing slash
   // TODO: helper for write actions
   // TODO: helper for read actions
@@ -18,7 +18,7 @@ export default function(url) {
       return fetch(`${url}SystemSettings`)
         .then(checkStatus)
         .then(res => res.json())
-        .then(parsed => parsed.Setpoint)
+        .then(parsed => parseFloat(parsed.Setpoint))
     },
   }
 }
