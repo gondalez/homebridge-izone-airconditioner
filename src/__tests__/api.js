@@ -2,6 +2,8 @@ import api from '../api'
 import { MODES } from '../api'
 import systemSettingsResponse from '../__fixtures__/systemSettings'
 
+// TODO: investigate promise errors
+
 test('setPower on', () => {
   const fetch = jest.fn()
   fetch.mockResolvedValueOnce({})
