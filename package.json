@@ -34,5 +34,8 @@
     "@babel/preset-env": "^7.8.3",
     "babel-jest": "^25.1.0",
     "jest": "^25.1.0"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.0"
   }
 }

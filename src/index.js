@@ -1,3 +1,4 @@
+import api from './api'
 let Service, Characteristic
 
 export default function(homebridge) {
@@ -19,6 +20,9 @@ class Thermostat {
     this.service = new Service.Thermostat(config.name)
 
     this.config = config
+    this.apiClient = api(config.url)
+
+    log('config', config)
 
     this.setTargetTemperature = this.setTargetTemperature.bind(this)
     this.getTargetTemperature = this.getTargetTemperature.bind(this)
@@ -47,13 +51,26 @@ class Thermostat {
 
   setTargetTemperature(value, callback) {
     this.log('setTargetTemperature: ', value)
-    callback()
+    this.apiClient
+      .setUnitSetpoint(value)
+      .then(() => {
+        this.log('setTargetTemperature OK')
+        callback()
+      })
+      .catch(e => {
+        // TODO: lib to convert api promise to callback pattern with logging
+        this.log('setTargetTemperature', e)
+        callback(e)
+      })
   }
 
   getTargetTemperature(callback) {
     this.log('getTargetTemperature')
-    const value = 24 // TODO
-    callback(null, value)
+
+    this.apiClient
+      .getUnitSetpoint()
+      .then(value => callback(null, value))
+      .catch(e => callback(e))
   }
 
   getCurrentTemperature(callback) {
@@ -64,6 +81,7 @@ class Thermostat {
 
   setTargetHeatingCoolingState(value, callback) {
     this.log('setTargetHeatingCoolingState: ', value)
+    // TODO
     callback()
   }
 
@@ -75,6 +93,7 @@ class Thermostat {
 
     this.log('getTargetHeatingCoolingState')
     const value = Characteristic.TargetHeatingCoolingState.COOL
+    // TODO
     callback(null, value)
   }
 
@@ -85,6 +104,7 @@ class Thermostat {
 
     this.log('getCurrentHeatingCoolingState')
     const value = Characteristic.CurrentHeatingCoolingState.COOL
+    // TODO
     callback(null, value)
   }
 
