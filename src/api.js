@@ -10,23 +10,14 @@ export default function(url, fetch = nodeFetch) {
   // * getCurrentTemperature (SystemSettings Temp attrib (or null if zero))
   // * setTargetHeatCoolState (send systemON then SystemMODE)
   // * getCurrentHeatCoolState (SystemSettings SysMode attrib)
+  const postJson = buildPostJson(fetch)
+  const readFloatAttribute = buildReadFloatAttribute(fetch)
 
   return {
-    setUnitSetpoint: value => {
-      return fetch(`${url}UnitSetpoint`, {
-        method: 'post',
-        body: JSON.stringify({ UnitSetpoint: value.toString() }),
-        headers: { 'Content-Type': 'application/json' },
-      })
-        .then(checkStatus)
-        .then(_res => true)
-    },
-    getUnitSetpoint: value => {
-      return fetch(`${url}SystemSettings`)
-        .then(checkStatus)
-        .then(res => res.json())
-        .then(parsed => parseFloat(parsed.Setpoint))
-    },
+    setUnitSetpoint: value =>
+      postJson(`${url}UnitSetpoint`, { UnitSetpoint: value.toString() }),
+    getUnitSetpoint: value =>
+      readFloatAttribute(`${url}SystemSettings`, 'Setpoint'),
   }
 }
 
@@ -38,3 +29,21 @@ function checkStatus(res) {
     throw `API ERROR ${res.statusText}`
   }
 }
+
+const readAttribute = (fetch, url, attribute) =>
+  fetch(url)
+    .then(checkStatus)
+    .then(res => res.json())
+    .then(parsed => parsed[attribute])
+
+const buildReadFloatAttribute = fetch => (url, attribute) =>
+  readAttribute(fetch, url, attribute).then(value => parseFloat(value))
+
+const buildPostJson = fetch => (url, body) =>
+  fetch(url, {
+    method: 'post',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+  })
+    .then(checkStatus)
+    .then(_res => true)
