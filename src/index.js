@@ -23,19 +23,6 @@ class Thermostat {
     this.apiClient = api(config.url)
 
     log('config', config)
-
-    this.getActive = this.getActive.bind(this)
-    this.setActive = this.setActive.bind(this)
-    this.getRotationSpeed = this.getRotationSpeed.bind(this)
-    this.getRotationSpeed = this.getRotationSpeed.bind(this)
-    this.setTargetTemperature = this.setTargetTemperature.bind(this)
-    this.getTargetTemperature = this.getTargetTemperature.bind(this)
-    this.getCurrentTemperature = this.getCurrentTemperature.bind(this)
-    this.setTargetHeaterCoolerState = this.setTargetHeaterCoolerState.bind(this)
-    this.getTargetHeaterCoolerState = this.getTargetHeaterCoolerState.bind(this)
-    this.getCurrentHeaterCoolerState = this.getCurrentHeaterCoolerState.bind(
-      this
-    )
   }
 
   // callback usage
@@ -175,11 +162,6 @@ class Thermostat {
       .setProps({ minStep: 33.3 }) // off = 0 | low = 33.3 | med = 66.6 | high = 99.9
       .on('get', this.getRotationSpeed.bind(this))
       .on('set', this.setRotationSpeed.bind(this))
-
-    // this.service
-    //   .getCharacteristic(Characteristic.TemperatureDisplayUnits)
-    //   .on('get', this.getTemperatureDisplayUnits.bind(this))
-    //   .on('set', this.setTemperatureDisplayUnits.bind(this))
 
     this.service
       .getCharacteristic(Characteristic.Name)
