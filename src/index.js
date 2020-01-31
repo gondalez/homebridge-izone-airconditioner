@@ -31,11 +31,17 @@ const writeHandler = (name, target, log) => (value, callback) => {
     })
 }
 
-const readHandler = (name, target, log) => callback => {
+const readHandler = (
+  name,
+  target,
+  log,
+  valueTransformer = null
+) => callback => {
   log(name, 'BEGIN READ')
 
   return target()
-    .then(value => {
+    .then(rawValue => {
+      const value = valueTransformer ? valueTransformer(rawValue) : rawValue
       log(name, 'READ OK', value)
       callback(null, value)
     })
@@ -92,36 +98,6 @@ class Thermostat {
     callback(null, value)
   }
 
-  setTargetHeaterCoolerState(value, callback) {
-    this.log('setTargetHeaterCoolerState: ', value)
-    // TODO: set state locally for use in getTargetHeaterCoolerState
-    // TODO: api call
-    callback()
-  }
-
-  getTargetHeaterCoolerState(callback) {
-    // Characteristic.TargetHeaterCoolerState.OFF = 0;
-    // Characteristic.TargetHeaterCoolerState.HEAT = 1;
-    // Characteristic.TargetHeaterCoolerState.COOL = 2;
-    // Characteristic.TargetHeaterCoolerState.AUTO = 3;
-
-    this.log('getTargetHeaterCoolerState')
-    const value = Characteristic.TargetHeaterCoolerState.COOL
-    // TODO: read from local var (as set in setTargetHeaterCoolerState prior to hitting the api
-    callback(null, value)
-  }
-
-  getCurrentHeaterCoolerState(callback) {
-    // Characteristic.TargetHeaterCoolerState.OFF = 0;
-    // Characteristic.TargetHeaterCoolerState.HEAT = 1;
-    // Characteristic.TargetHeaterCoolerState.COOL = 2;
-
-    this.log('getCurrentHeaterCoolerState')
-    const value = Characteristic.CurrentHeaterCoolerState.COOL
-    // TODO
-    callback(null, value)
-  }
-
   getServices() {
     this.informationService = new Service.AccessoryInformation()
     const api = this.apiClient
@@ -135,17 +111,42 @@ class Thermostat {
 
     this.service
       .getCharacteristic(Characteristic.Active)
-      .on('get', this.getActive.bind(this))
-      .on('set', this.setActive.bind(this))
+      .on('get', readHandler('Active', api.getPower, log))
+      .on('set', writeHandler('Active', api.setPower, log))
+
+    const currentHeaterCoolerStateHandler = readHandler(
+      'CurrentHeaterCoolerState',
+      api.getHeatCoolState,
+      log,
+      value => {
+        // static readonly INACTIVE = 0;
+        // static readonly IDLE = 1;
+        // static readonly HEATING = 2;
+        // static readonly COOLING = 3;
+
+        switch (value) {
+          case 'cool':
+            return Characteristic.CurrentHeaterCoolerState.COOLING
+          case 'heat':
+            return Characteristic.CurrentHeaterCoolerState.HEATING
+          case 'vent':
+            return Characteristic.CurrentHeaterCoolerState.COOLING
+          case 'dry':
+            return Characteristic.CurrentHeaterCoolerState.COOLING
+          default:
+            return Characteristic.CurrentHeaterCoolerState.INACTIVE
+        }
+      }
+    )
 
     this.service
       .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
-      .on('get', this.getCurrentHeaterCoolerState.bind(this))
+      .on('get', currentHeaterCoolerStateHandler)
 
-    this.service
-      .getCharacteristic(Characteristic.TargetHeaterCoolerState)
-      .on('get', this.getTargetHeaterCoolerState.bind(this))
-      .on('set', this.setTargetHeaterCoolerState.bind(this))
+    // this.service
+    //   .getCharacteristic(Characteristic.TargetHeaterCoolerState)
+    //   .on('get', this.getTargetHeaterCoolerState.bind(this))
+    //   .on('set', this.setTargetHeaterCoolerState.bind(this))
 
     this.service
       .getCharacteristic(Characteristic.CurrentTemperature)

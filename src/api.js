@@ -13,21 +13,17 @@ export default function(url, fetch = nodeFetch) {
   // TODO: helper for write actions
   // TODO: helper for read actions
 
-  // TODO:
-  // actions
-  // * getCurrentTemperature (SystemSettings Temp attrib (or null if zero))
-  // * setTargetHeatCoolState (send systemON then SystemMODE)
-  // * getCurrentHeatCoolState (SystemSettings SysMode attrib)
-  // * setPower (SystemON)
   const postJson = buildPostJson(fetch)
   const readFloatAttribute = buildReadFloatAttribute(fetch)
   const readStringAttribute = buildReadStringAttribute(fetch)
+  const readOnOffAttribute = buildReadOnOffAttribute(fetch)
 
   return {
     setUnitSetpoint: value =>
       postJson(`${url}UnitSetpoint`, { UnitSetpoint: value.toString() }),
     setPower: value =>
       postJson(`${url}SystemON`, { SystemON: value ? 'on' : 'off' }),
+    getPower: () => readOnOffAttribute(`${url}SystemSettings`, 'SysOn'),
     setMode: value => postJson(`${url}SystemMODE`, { SystemMODE: value }),
     getUnitSetpoint: () =>
       readFloatAttribute(`${url}SystemSettings`, 'Setpoint'),
@@ -58,6 +54,9 @@ const buildReadFloatAttribute = fetch => (url, attribute) =>
 
 const buildReadStringAttribute = fetch => (url, attribute) =>
   readAttribute(fetch, url, attribute).then(value => value.toString())
+
+const buildReadOnOffAttribute = fetch => (url, attribute) =>
+  readAttribute(fetch, url, attribute).then(value => value === 'on')
 
 const buildPostJson = fetch => (url, body) =>
   fetch(url, {
