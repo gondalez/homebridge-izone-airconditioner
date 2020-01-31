@@ -31,6 +31,20 @@ const writeHandler = (name, target, log) => (value, callback) => {
     })
 }
 
+const readHandler = (name, target, log) => callback => {
+  log(name, 'BEGIN READ')
+
+  return target()
+    .then(value => {
+      log(name, 'READ OK', value)
+      callback(null, value)
+    })
+    .catch(e => {
+      log(name, 'READ ERROR', e)
+      callback(e)
+    })
+}
+
 class Thermostat {
   constructor(log, config) {
     log('constructing')
@@ -70,14 +84,6 @@ class Thermostat {
   setRotationSpeed(value, callback) {
     this.log('setRotationSpeed: ', value)
     callback()
-  }
-
-  getTargetTemperature(callback) {
-    this.log('getTargetTemperature')
-    this.apiClient
-      .getUnitSetpoint()
-      .then(value => callback(null, value))
-      .catch(e => callback(e))
   }
 
   getCurrentTemperature(callback) {
@@ -149,13 +155,13 @@ class Thermostat {
     this.service
       .getCharacteristic(Characteristic.CoolingThresholdTemperature)
       .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
-      .on('get', this.getTargetTemperature.bind(this))
+      .on('get', readHandler('CoolingThreshold', api.getUnitSetpoint, log))
       .on('set', writeHandler('CoolingThreshold', api.setUnitSetpoint, log))
 
     this.service
       .getCharacteristic(Characteristic.HeatingThresholdTemperature)
       .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
-      .on('get', this.getTargetTemperature.bind(this))
+      .on('get', readHandler('HeatingThreshold', api.getUnitSetpoint, log))
       .on('set', writeHandler('HeatingThreshold', api.setUnitSetpoint, log))
 
     this.service
