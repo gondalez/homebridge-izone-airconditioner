@@ -12,6 +12,25 @@ export default function(homebridge) {
   )
 }
 
+// callback usage
+// callback() - successful write action
+// callback(null, newValue) - successful read action
+// callback(error) - error
+
+const writeHandler = (name, target, log) => (value, callback) => {
+  log(name, 'BEGIN WRITE', value)
+
+  return target(value)
+    .then(() => {
+      log(name, 'WRITE OK', value)
+      callback()
+    })
+    .catch(e => {
+      log(name, 'WRITE ERROR', value, e)
+      callback(e)
+    })
+}
+
 class Thermostat {
   constructor(log, config) {
     log('constructing')
@@ -24,11 +43,6 @@ class Thermostat {
 
     log('config', config)
   }
-
-  // callback usage
-  // callback() - successful write action
-  // callback(null, newValue) - successful read action
-  // callback(error) - error
 
   getName(callback) {
     this.log('getName')
@@ -56,21 +70,6 @@ class Thermostat {
   setRotationSpeed(value, callback) {
     this.log('setRotationSpeed: ', value)
     callback()
-  }
-
-  setTargetTemperature(value, callback) {
-    this.log('setTargetTemperature: ', value)
-    this.apiClient
-      .setUnitSetpoint(value)
-      .then(() => {
-        this.log('setTargetTemperature OK')
-        callback()
-      })
-      .catch(e => {
-        // TODO: lib to convert api promise to callback pattern with logging
-        this.log('setTargetTemperature', e)
-        callback(e)
-      })
   }
 
   getTargetTemperature(callback) {
@@ -119,6 +118,8 @@ class Thermostat {
 
   getServices() {
     this.informationService = new Service.AccessoryInformation()
+    const api = this.apiClient
+    const log = this.log
 
     // TODO: get from api
     this.informationService
@@ -149,13 +150,13 @@ class Thermostat {
       .getCharacteristic(Characteristic.CoolingThresholdTemperature)
       .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
       .on('get', this.getTargetTemperature.bind(this))
-      .on('set', this.setTargetTemperature.bind(this))
+      .on('set', writeHandler('CoolingThreshold', api.setUnitSetpoint, log))
 
     this.service
       .getCharacteristic(Characteristic.HeatingThresholdTemperature)
       .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
       .on('get', this.getTargetTemperature.bind(this))
-      .on('set', this.setTargetTemperature.bind(this))
+      .on('set', writeHandler('HeatingThreshold', api.setUnitSetpoint, log))
 
     this.service
       .getCharacteristic(Characteristic.RotationSpeed)
