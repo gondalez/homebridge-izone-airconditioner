@@ -206,15 +206,15 @@ class Thermostat {
       value => {
         switch (value) {
           case 'low':
-            return 33.3
-          case 'medium':
-            return 66.6
+            return 25
+          case 'med':
+            return 50
           case 'high':
-            return 99.9
+            return 75
           case 'auto':
-            return 99.9
+            return 100
           default:
-            return 0.0
+            return 0
         }
       }
     )
@@ -225,14 +225,16 @@ class Thermostat {
       log,
       value => {
         switch (value) {
-          case 0.0:
+          case 0:
             return 'low'
-          case 33.3:
+          case 25:
             return 'low'
-          case 66.6:
+          case 50:
             return 'medium'
-          case 99.9:
+          case 75:
             return 'high'
+          case 100:
+            return 'auto'
           default:
             return 'low'
         }
@@ -241,7 +243,7 @@ class Thermostat {
 
     this.service
       .getCharacteristic(Characteristic.RotationSpeed)
-      .setProps({ minStep: 33.3 }) // off = 0 | low = 33.3 | med = 66.6 | high = 99.9
+      .setProps({ minStep: 25, minValue: 0, maxValue: 100 }) // off = 0 | low = 25 | med = 50 | high = 75 | auto = 100
       .on('get', getRotationSpeedHandler)
       .on('set', setRotationSpeedHandler)
 
