@@ -1,5 +1,5 @@
 # homebridge-izone-airconditioner
-A [homebridge](https://github.com/nfarina/homebridge) plugin that allows you to control your iZone airconditioner with Homekit and Siri.
+A [homebridge](https://github.com/nfarina/homebridge) plugin that allows you to control your iZone air conditioner with Homekit and Siri.
 
 Install the plugin:
 
