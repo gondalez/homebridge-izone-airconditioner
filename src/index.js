@@ -133,10 +133,11 @@ class Thermostat {
   getServices() {
     this.informationService = new Service.AccessoryInformation()
 
+    // TODO: get from api
     this.informationService
-      .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
-      .setCharacteristic(Characteristic.Model, this.model)
-      .setCharacteristic(Characteristic.SerialNumber, this.serial)
+      .setCharacteristic(Characteristic.Manufacturer, 'iZone')
+      .setCharacteristic(Characteristic.Model, '-')
+      .setCharacteristic(Characteristic.SerialNumber, '-')
 
     this.service
       .getCharacteristic(Characteristic.Active)
