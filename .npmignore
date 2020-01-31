@@ -1,0 +1,5 @@
+.babelrc
+dist/__fixtures__/
+dist/__tests__/
+prettier.config.js
+src/
