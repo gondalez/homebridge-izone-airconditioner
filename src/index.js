@@ -17,16 +17,20 @@ export default function(homebridge) {
 // callback(null, newValue) - successful read action
 // callback(error) - error
 
-const writeHandler = (name, target, log) => (value, callback) => {
-  log(name, 'BEGIN WRITE', value)
+const writeHandler = (name, target, log, valueTransformer = null) => (
+  rawValue,
+  callback
+) => {
+  const value = valueTransformer ? valueTransformer(rawValue) : rawValue
+  log(name, 'BEGIN WRITE', rawValue, value)
 
   return target(value)
     .then(() => {
-      log(name, 'WRITE OK', value)
+      log(name, 'WRITE OK', rawValue, value)
       callback()
     })
     .catch(e => {
-      log(name, 'WRITE ERROR', value, e)
+      log(name, 'WRITE ERROR', rawValue, value, e)
       callback(e)
     })
 }
@@ -42,7 +46,7 @@ const readHandler = (
   return target()
     .then(rawValue => {
       const value = valueTransformer ? valueTransformer(rawValue) : rawValue
-      log(name, 'READ OK', value)
+      log(name, 'READ OK', rawValue, value)
       callback(null, value)
     })
     .catch(e => {
@@ -70,40 +74,11 @@ class Thermostat {
     callback(null, value)
   }
 
-  getActive(callback) {
-    this.log('getActive')
-    const value = true
-    callback(null, value)
-  }
-
-  setActive(value, callback) {
-    this.log('setActive: ', value)
-    callback()
-  }
-
-  getRotationSpeed(callback) {
-    this.log('getRotationSpeed')
-    const value = 66.6
-    callback(null, value)
-  }
-
-  setRotationSpeed(value, callback) {
-    this.log('setRotationSpeed: ', value)
-    callback()
-  }
-
-  getCurrentTemperature(callback) {
-    this.log('getCurrentTemperature')
-    const value = 32 // TODO
-    callback(null, value)
-  }
-
   getServices() {
     this.informationService = new Service.AccessoryInformation()
     const api = this.apiClient
     const log = this.log
 
-    // TODO: get from api
     this.informationService
       .setCharacteristic(Characteristic.Manufacturer, 'iZone')
       .setCharacteristic(Characteristic.Model, '-')
@@ -114,9 +89,10 @@ class Thermostat {
       .on('get', readHandler('Active', api.getPower, log))
       .on('set', writeHandler('Active', api.setPower, log))
 
-    const currentHeaterCoolerStateHandler = readHandler(
+    // this is what the unit is currently doing
+    const getCurrentHeaterCoolerStateHandler = readHandler(
       'CurrentHeaterCoolerState',
-      api.getHeatCoolState,
+      api.getMode,
       log,
       value => {
         // static readonly INACTIVE = 0;
@@ -133,6 +109,8 @@ class Thermostat {
             return Characteristic.CurrentHeaterCoolerState.COOLING
           case 'dry':
             return Characteristic.CurrentHeaterCoolerState.COOLING
+          case 'auto':
+            return Characteristic.CurrentHeaterCoolerState.COOLING
           default:
             return Characteristic.CurrentHeaterCoolerState.INACTIVE
         }
@@ -141,16 +119,72 @@ class Thermostat {
 
     this.service
       .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
-      .on('get', currentHeaterCoolerStateHandler)
+      .on('get', getCurrentHeaterCoolerStateHandler)
 
-    // this.service
-    //   .getCharacteristic(Characteristic.TargetHeaterCoolerState)
-    //   .on('get', this.getTargetHeaterCoolerState.bind(this))
-    //   .on('set', this.setTargetHeaterCoolerState.bind(this))
+    // this is the mode the unit is set to
+    const getTargetHeaterCoolerStateHandler = readHandler(
+      'TargetHeaterCoolerState',
+      api.getMode,
+      log,
+      value => {
+        // static readonly AUTO = 0;
+        // static readonly HEAT = 1;
+        // static readonly COOL = 2;
+
+        switch (value) {
+          case 'cool':
+            return Characteristic.TargetHeaterCoolerState.COOL
+          case 'heat':
+            return Characteristic.TargetHeaterCoolerState.HEAT
+          case 'vent':
+            return Characteristic.TargetHeaterCoolerState.COOL
+          case 'dry':
+            return Characteristic.TargetHeaterCoolerState.COOL
+          case 'auto':
+            return Characteristic.TargetHeaterCoolerState.AUTO
+          default:
+            return Characteristic.TargetHeaterCoolerState.AUTO
+        }
+      }
+    )
+
+    const setTargetHeaterCoolerStateHandler = writeHandler(
+      'TargetHeaterCoolerState',
+      api.setMode,
+      log,
+      value => {
+        // static readonly AUTO = 0;
+        // static readonly HEAT = 1;
+        // static readonly COOL = 2;
+
+        switch (value) {
+          case Characteristic.TargetHeaterCoolerState.COOL:
+            return 'cool'
+          case Characteristic.TargetHeaterCoolerState.HEAT:
+            return 'heat'
+          case Characteristic.TargetHeaterCoolerState.AUTO:
+            return 'auto'
+          default:
+            return 'auto'
+          // throw `Unrecognized value ${value}`
+        }
+      }
+    )
+
+    this.service
+      .getCharacteristic(Characteristic.TargetHeaterCoolerState)
+      .on('get', getTargetHeaterCoolerStateHandler)
+      .on('set', setTargetHeaterCoolerStateHandler)
+
+    const getCurrentTemperatureHandler = readHandler(
+      'CurrentTemperature',
+      api.getActualTemperature,
+      log
+    )
 
     this.service
       .getCharacteristic(Characteristic.CurrentTemperature)
-      .on('get', this.getCurrentTemperature.bind(this))
+      .on('get', getCurrentTemperatureHandler)
       .setProps({ minStep: 0.1 })
 
     this.service
@@ -165,11 +199,51 @@ class Thermostat {
       .on('get', readHandler('HeatingThreshold', api.getUnitSetpoint, log))
       .on('set', writeHandler('HeatingThreshold', api.setUnitSetpoint, log))
 
+    const getRotationSpeedHandler = readHandler(
+      'RotationSpeed',
+      api.getFanSpeed,
+      log,
+      value => {
+        switch (value) {
+          case 'low':
+            return 33.3
+          case 'medium':
+            return 66.6
+          case 'high':
+            return 99.9
+          case 'auto':
+            return 99.9
+          default:
+            return 0.0
+        }
+      }
+    )
+
+    const setRotationSpeedHandler = writeHandler(
+      'RotationSpeed',
+      api.setFanSpeed,
+      log,
+      value => {
+        switch (value) {
+          case 0.0:
+            return 'low'
+          case 33.3:
+            return 'low'
+          case 66.6:
+            return 'medium'
+          case 99.9:
+            return 'high'
+          default:
+            return 'low'
+        }
+      }
+    )
+
     this.service
       .getCharacteristic(Characteristic.RotationSpeed)
       .setProps({ minStep: 33.3 }) // off = 0 | low = 33.3 | med = 66.6 | high = 99.9
-      .on('get', this.getRotationSpeed.bind(this))
-      .on('set', this.setRotationSpeed.bind(this))
+      .on('get', getRotationSpeedHandler)
+      .on('set', setRotationSpeedHandler)
 
     this.service
       .getCharacteristic(Characteristic.Name)

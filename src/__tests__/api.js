@@ -114,13 +114,13 @@ test('getActualTemperature', () => {
   expect(fetch.mock.calls).toEqual([['http://example.com/SystemSettings']])
 })
 
-test('getHeatCoolState', () => {
+test('getMode', () => {
   const fetch = jest.fn()
   fetch.mockResolvedValueOnce({ ok: true, json: () => systemSettingsResponse })
 
   const client = api('http://example.com/', fetch)
 
-  client.getHeatCoolState().then(result => {
+  client.getMode().then(result => {
     expect(result).toEqual(MODES.cool)
   })
 

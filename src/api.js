@@ -19,18 +19,19 @@ export default function(url, fetch = nodeFetch) {
   const readOnOffAttribute = buildReadOnOffAttribute(fetch)
 
   return {
-    setUnitSetpoint: value =>
-      postJson(`${url}UnitSetpoint`, { UnitSetpoint: value.toString() }),
     setPower: value =>
       postJson(`${url}SystemON`, { SystemON: value ? 'on' : 'off' }),
     getPower: () => readOnOffAttribute(`${url}SystemSettings`, 'SysOn'),
-    setMode: value => postJson(`${url}SystemMODE`, { SystemMODE: value }),
     getUnitSetpoint: () =>
       readFloatAttribute(`${url}SystemSettings`, 'Setpoint'),
+    setUnitSetpoint: value =>
+      postJson(`${url}UnitSetpoint`, { UnitSetpoint: value.toString() }),
+    setMode: value => postJson(`${url}SystemMODE`, { SystemMODE: value }),
+    getMode: () => readStringAttribute(`${url}SystemSettings`, 'SysMode'),
+    setFanSpeed: value => postJson(`${url}SystemFAN`, { SystemFAN: value }),
+    getFanSpeed: () => readStringAttribute(`${url}SystemSettings`, 'SysFan'),
     getActualTemperature: () =>
       readFloatAttribute(`${url}SystemSettings`, 'Supply'),
-    getHeatCoolState: () =>
-      readStringAttribute(`${url}SystemSettings`, 'SysMode'),
   }
 }
 
