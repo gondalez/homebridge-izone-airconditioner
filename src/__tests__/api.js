@@ -2,11 +2,9 @@ import api from '../api'
 import { MODES } from '../api'
 import systemSettingsResponse from '../__fixtures__/systemSettings'
 
-// TODO: investigate promise errors
-
 test('setPower on', () => {
   const fetch = jest.fn()
-  fetch.mockResolvedValueOnce({})
+  fetch.mockResolvedValueOnce({ ok: true })
   fetch.mockResolvedValueOnce({})
 
   const client = api('http://example.com/', fetch)
@@ -27,7 +25,7 @@ test('setPower on', () => {
 
 test('setPower off', () => {
   const fetch = jest.fn()
-  fetch.mockResolvedValueOnce({})
+  fetch.mockResolvedValueOnce({ ok: true })
   fetch.mockResolvedValueOnce({})
 
   const client = api('http://example.com/', fetch)
@@ -46,9 +44,21 @@ test('setPower off', () => {
   ])
 })
 
+test('setPower on error', () => {
+  const fetch = jest.fn()
+  fetch.mockResolvedValueOnce({ ok: false, statusText: 'TEST RESULT' })
+  fetch.mockResolvedValueOnce({})
+
+  const client = api('http://example.com/', fetch)
+
+  client
+    .setPower(true)
+    .catch(e => expect(e.toString()).toEqual('API ERROR: TEST RESULT'))
+})
+
 test('setMode cool', () => {
   const fetch = jest.fn()
-  fetch.mockResolvedValueOnce({})
+  fetch.mockResolvedValueOnce({ ok: true })
   fetch.mockResolvedValueOnce({})
 
   const client = api('http://example.com/', fetch)
@@ -69,7 +79,7 @@ test('setMode cool', () => {
 
 test('setUnitSetpoint', () => {
   const fetch = jest.fn()
-  fetch.mockResolvedValueOnce({})
+  fetch.mockResolvedValueOnce({ ok: true })
   fetch.mockResolvedValueOnce({})
 
   const client = api('http://example.com/', fetch)

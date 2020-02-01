@@ -40,7 +40,7 @@ function checkStatus(res) {
     // res.status >= 200 && res.status < 300
     return res
   } else {
-    throw `API ERROR ${res.statusText}`
+    throw `API ERROR: ${res.statusText}`
   }
 }
 
