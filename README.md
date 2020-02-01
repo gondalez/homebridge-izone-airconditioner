@@ -21,4 +21,6 @@ The detected temperature is based on the "Supply" temperature, but the iZone con
 
 It is not possible to set the mode to "Vent" or "Dry". This is a Homekit limitation.
 
+When setting the mode to "Auto" and setting a temperature range, the maximum temperature is used. This is a limitation of the iZone controller which does not support ranges.
+
 The fan speed is accessible via the cog icon for the accessory. The slider will snap into place for Low, Med, High settings. Setting the slider to max sets the fan to auto.
