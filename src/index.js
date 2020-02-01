@@ -6,6 +6,10 @@ import {
   set as setTargetHeaterCoolerStateHandler,
 } from './handlers/targetHeaterCoolerState'
 import { get as getCurrentTemperatureHandler } from './handlers/currentTemperature'
+import {
+  get as getRotationSpeedHandler,
+  set as setRotationSpeedHandler,
+} from './handlers/rotationSpeed'
 
 let Service, Characteristic
 
@@ -87,53 +91,11 @@ class Thermostat {
       .on('get', readHandler('HeatingThreshold', api.getUnitSetpoint, log))
       .on('set', writeHandler('HeatingThreshold', api.setUnitSetpoint, log))
 
-    const getRotationSpeedHandler = readHandler(
-      'RotationSpeed',
-      api.getFanSpeed,
-      log,
-      value => {
-        switch (value) {
-          case 'low':
-            return 25
-          case 'med':
-            return 50
-          case 'high':
-            return 75
-          case 'auto':
-            return 100
-          default:
-            return 0
-        }
-      }
-    )
-
-    const setRotationSpeedHandler = writeHandler(
-      'RotationSpeed',
-      api.setFanSpeed,
-      log,
-      value => {
-        switch (value) {
-          case 0:
-            return 'low'
-          case 25:
-            return 'low'
-          case 50:
-            return 'medium'
-          case 75:
-            return 'high'
-          case 100:
-            return 'auto'
-          default:
-            return 'low'
-        }
-      }
-    )
-
     this.service
       .getCharacteristic(Characteristic.RotationSpeed)
-      .setProps({ minStep: 25, minValue: 0, maxValue: 100 }) // off = 0 | low = 25 | med = 50 | high = 75 | auto = 100
-      .on('get', getRotationSpeedHandler)
-      .on('set', setRotationSpeedHandler)
+      .setProps({ minStep: 25, minValue: 0, maxValue: 100 })
+      .on('get', getRotationSpeedHandler(api, log))
+      .on('set', setRotationSpeedHandler(api, log))
 
     this.service
       .getCharacteristic(Characteristic.Name)
