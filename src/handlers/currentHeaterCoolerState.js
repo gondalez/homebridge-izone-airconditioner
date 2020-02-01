@@ -2,6 +2,7 @@ import { readHandler } from './'
 
 // The "current" state is intended to be what the cooler is doing regardless of the target mode.
 // e.g. if the target mode is set to cool to 24c but the indoor temp is 22c then the current state might be IDLE
+// The iZone controller doesn't implement this so assume it is doing what it is tasked with.
 
 // static readonly INACTIVE = 0;
 // static readonly IDLE = 1;
@@ -22,6 +23,6 @@ export const get = (api, log, Characteristic) =>
       case 'auto':
         return Characteristic.CurrentHeaterCoolerState.COOLING
       default:
-        return Characteristic.CurrentHeaterCoolerState.INACTIVE
+        throw `Unrecognized value ${value}`
     }
   })
