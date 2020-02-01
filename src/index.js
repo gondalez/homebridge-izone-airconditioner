@@ -89,8 +89,8 @@ const Thermostat = (log, config) => {
 
       service
         .getCharacteristic(Characteristic.CurrentTemperature)
-        .on('get', getCurrentTemperatureHandler(apiClient, log))
         .setProps({ minStep: 0.1 })
+        .on('get', getCurrentTemperatureHandler(apiClient, log))
 
       service
         .getCharacteristic(Characteristic.CoolingThresholdTemperature)
