@@ -66,6 +66,16 @@ test('error handling', () => {
     .catch(e => expect(e.toString()).toEqual('API ERROR: TEST RESULT'))
 })
 
+test('url with no trailing slash', () => {
+  testUrl('http://example.com')
+})
+
+test('invalid url', () => {
+  expect(() => {
+    api('example.com')
+  }).toThrow('Not a valid URL')
+})
+
 const testRead = (action, expectedResult) => {
   const fetch = jest.fn()
   fetch.mockResolvedValueOnce({ ok: true, json: () => systemSettingsResponse })
@@ -98,4 +108,15 @@ const testWrite = (doAction, expectedPath, expectedBody) => {
       },
     ],
   ])
+}
+
+const testUrl = url => {
+  const fetch = jest.fn()
+  fetch.mockResolvedValueOnce({ ok: true, json: () => systemSettingsResponse })
+
+  const client = api(url, fetch)
+
+  client.getPower().then(result => {})
+
+  expect(fetch.mock.calls).toEqual([['http://example.com/SystemSettings']])
 }

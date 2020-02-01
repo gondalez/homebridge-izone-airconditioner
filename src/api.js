@@ -1,4 +1,5 @@
 import nodeFetch from 'node-fetch'
+import URI from 'urijs'
 
 export const MODES = {
   cool: 'cool',
@@ -8,10 +9,13 @@ export const MODES = {
   auto: 'auto',
 }
 
-export default function(url, fetch = nodeFetch) {
-  // TODO: parse url and be flexible on trailing slashes, http:// etc. tests!
-  // TODO: helper for write actions
-  // TODO: helper for read actions
+export default function(rawUrl, fetch = nodeFetch) {
+  const parsedUrl = URI(rawUrl)
+  const protocol = parsedUrl.protocol()
+
+  if (protocol !== 'http' && protocol !== 'https') throw 'Not a valid URL'
+
+  const url = parsedUrl.toString()
 
   const postJson = buildPostJson(fetch)
   const readFloatAttribute = buildReadFloatAttribute(fetch)
