@@ -36,6 +36,11 @@ export default function(rawUrl, fetch = nodeFetch) {
     getFanSpeed: () => readStringAttribute(`${url}SystemSettings`, 'SysFan'),
     getActualTemperature: () =>
       readFloatAttribute(`${url}SystemSettings`, 'Supply'),
+    getPowerAndMode: () =>
+      Promise.all([
+        readOnOffAttribute(`${url}SystemSettings`, 'SysOn'),
+        readStringAttribute(`${url}SystemSettings`, 'SysMode'),
+      ]),
   }
 }
 

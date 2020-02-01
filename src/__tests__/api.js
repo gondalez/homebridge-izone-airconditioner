@@ -41,6 +41,25 @@ test('setFanSpeed med', () =>
     '{"SystemFAN":"med"}'
   ))
 
+test('getPowerAndMode', () => {
+  const fetch = jest.fn()
+  fetch.mockResolvedValueOnce({ ok: true, json: () => systemSettingsResponse })
+  fetch.mockResolvedValueOnce({ ok: true, json: () => systemSettingsResponse })
+
+  const client = api('http://example.com/', fetch)
+
+  const promise = client.getPowerAndMode().then(result => {
+    expect(result).toEqual([false, MODES.cool])
+  })
+
+  expect(fetch.mock.calls).toEqual([
+    ['http://example.com/SystemSettings'],
+    ['http://example.com/SystemSettings'],
+  ])
+
+  return promise
+})
+
 test('error handling', () => {
   const fetch = jest.fn()
   fetch.mockResolvedValueOnce({ ok: false, statusText: 'TEST RESULT' })

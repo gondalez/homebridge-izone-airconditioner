@@ -10,8 +10,12 @@ import { readHandler } from './'
 // static readonly COOLING = 3;
 
 export const get = (api, log, Characteristic) =>
-  readHandler('CurrentHeaterCoolerState', api.getMode, log, value => {
-    switch (value) {
+  readHandler('CurrentHeaterCoolerState', api.getPowerAndMode, log, value => {
+    const [power, mode] = value
+
+    if (!power) return Characteristic.CurrentHeaterCoolerState.INACTIVE
+
+    switch (mode) {
       case 'cool':
         return Characteristic.CurrentHeaterCoolerState.COOLING
       case 'heat':
