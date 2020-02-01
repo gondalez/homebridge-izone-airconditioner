@@ -89,6 +89,8 @@ class Thermostat {
       .on('get', readHandler('Active', api.getPower, log))
       .on('set', writeHandler('Active', api.setPower, log))
 
+    // TODO: extract handlers into ./handlers/** and test
+
     // this is what the unit is currently doing
     const getCurrentHeaterCoolerStateHandler = readHandler(
       'CurrentHeaterCoolerState',
