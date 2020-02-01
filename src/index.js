@@ -43,11 +43,6 @@ export default function(homebridge) {
   )
 }
 
-// callback usage
-// callback() - successful write action
-// callback(null, newValue) - successful read action
-// callback(error) - error
-
 class Thermostat {
   constructor(log, config) {
     log('constructing')

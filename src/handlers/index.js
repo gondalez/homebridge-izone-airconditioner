@@ -1,3 +1,8 @@
+// callback usage
+// callback() - successful write action
+// callback(null, newValue) - successful read action
+// callback(error) - error
+
 export const writeHandler = (name, target, log, valueTransformer = null) => (
   rawValue,
   callback
