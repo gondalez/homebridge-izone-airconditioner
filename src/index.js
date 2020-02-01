@@ -1,19 +1,34 @@
 import api from './api'
-import { readHandler, writeHandler } from './handlers'
+
+// handlers
 import { get as getCurrentHeaterCoolerStateHandler } from './handlers/currentHeaterCoolerState'
+
 import {
   get as getTargetHeaterCoolerStateHandler,
   set as setTargetHeaterCoolerStateHandler,
 } from './handlers/targetHeaterCoolerState'
+
 import { get as getCurrentTemperatureHandler } from './handlers/currentTemperature'
+
 import {
   get as getRotationSpeedHandler,
   set as setRotationSpeedHandler,
 } from './handlers/rotationSpeed'
+
 import {
   get as getActiveHandler,
   set as setActiveHandler,
 } from './handlers/active'
+
+import {
+  get as getHeatingThresholdHandler,
+  set as setHeatingThresholdHandler,
+} from './handlers/heatingThreshold'
+
+import {
+  get as getCoolingThresholdHandler,
+  set as setCoolingThresholdHandler,
+} from './handlers/coolingThreshold'
 
 let Service, Characteristic
 
@@ -67,8 +82,6 @@ class Thermostat {
       .on('get', getActiveHandler(api, log))
       .on('set', setActiveHandler(api, log))
 
-    // TODO: extract handlers into ./handlers/** and test
-
     this.service
       .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
       .on('get', getCurrentHeaterCoolerStateHandler(api, log, Characteristic))
@@ -86,14 +99,14 @@ class Thermostat {
     this.service
       .getCharacteristic(Characteristic.CoolingThresholdTemperature)
       .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
-      .on('get', readHandler('CoolingThreshold', api.getUnitSetpoint, log))
-      .on('set', writeHandler('CoolingThreshold', api.setUnitSetpoint, log))
+      .on('get', getCoolingThresholdHandler(api, log))
+      .on('set', setCoolingThresholdHandler(api, log))
 
     this.service
       .getCharacteristic(Characteristic.HeatingThresholdTemperature)
       .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
-      .on('get', readHandler('HeatingThreshold', api.getUnitSetpoint, log))
-      .on('set', writeHandler('HeatingThreshold', api.setUnitSetpoint, log))
+      .on('get', getHeatingThresholdHandler(api, log))
+      .on('set', setHeatingThresholdHandler(api, log))
 
     this.service
       .getCharacteristic(Characteristic.RotationSpeed)
