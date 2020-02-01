@@ -8,14 +8,14 @@ export const get = (api, log) =>
     switch (value) {
       case 'low':
         return 25
-      case 'med':
+      case 'med': // deliberate med/medium
         return 50
       case 'high':
         return 75
       case 'auto':
         return 100
       default:
-        return 0
+        throw `Unrecognized value ${value}`
     }
   })
 
@@ -27,12 +27,12 @@ export const set = (api, log) =>
       case 25:
         return 'low'
       case 50:
-        return 'medium'
+        return 'medium' // deliberate med/medium
       case 75:
         return 'high'
       case 100:
         return 'auto'
       default:
-        return 'low'
+        throw `Unrecognized value ${value}`
     }
   })
