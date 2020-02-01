@@ -1,5 +1,6 @@
 import api from './api'
 import { readHandler, writeHandler } from './handlers'
+import { get as getCurrentHeaterCoolerStateHandler } from './handlers/currentHeaterCoolerState'
 
 let Service, Characteristic
 
@@ -55,37 +56,9 @@ class Thermostat {
 
     // TODO: extract handlers into ./handlers/** and test
 
-    // this is what the unit is currently doing
-    const getCurrentHeaterCoolerStateHandler = readHandler(
-      'CurrentHeaterCoolerState',
-      api.getMode,
-      log,
-      value => {
-        // static readonly INACTIVE = 0;
-        // static readonly IDLE = 1;
-        // static readonly HEATING = 2;
-        // static readonly COOLING = 3;
-
-        switch (value) {
-          case 'cool':
-            return Characteristic.CurrentHeaterCoolerState.COOLING
-          case 'heat':
-            return Characteristic.CurrentHeaterCoolerState.HEATING
-          case 'vent':
-            return Characteristic.CurrentHeaterCoolerState.COOLING
-          case 'dry':
-            return Characteristic.CurrentHeaterCoolerState.COOLING
-          case 'auto':
-            return Characteristic.CurrentHeaterCoolerState.COOLING
-          default:
-            return Characteristic.CurrentHeaterCoolerState.INACTIVE
-        }
-      }
-    )
-
     this.service
       .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
-      .on('get', getCurrentHeaterCoolerStateHandler)
+      .on('get', getCurrentHeaterCoolerStateHandler(api, log, Characteristic))
 
     // this is the mode the unit is set to
     const getTargetHeaterCoolerStateHandler = readHandler(
