@@ -10,8 +10,11 @@ Add the following to config.json:
     {
       "accessory": "iZone Air Conditioner",
       "name": "Air Conditioner",
-      "url": "http://<lan ip address of iZone controller>/"
+      "url": "http://<lan ip address of iZone controller>/",
+      "reportSetpointAsCurrentTemperature": false
     }
+
+Use `reportSetpointAsCurrentTemperature` if you see 0.0 as the current temperature. This happens when your iZone controller returns 0.0 as the "Supply" temperature, as does mine. Setting this option tells the plugin to show the last set temperature as the current temperature. I am emailing iZone to see if this is a bug or misconfiguration.
 
 ## Limits
 

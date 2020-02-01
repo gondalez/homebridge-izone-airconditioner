@@ -75,7 +75,12 @@ export default function(homebridge) {
         service
           .getCharacteristic(Characteristic.CurrentTemperature)
           .setProps({ minStep: 0.1 })
-          .on('get', getCurrentTemperatureHandler(apiClient, log))
+          .on(
+            'get',
+            config.reportSetpointAsCurrentTemperature
+              ? getCoolingThresholdHandler(apiClient, log)
+              : getCurrentTemperatureHandler(apiClient, log)
+          )
 
         service
           .getCharacteristic(Characteristic.CoolingThresholdTemperature)
