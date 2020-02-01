@@ -1,6 +1,10 @@
 import api from './api'
 import { readHandler, writeHandler } from './handlers'
 import { get as getCurrentHeaterCoolerStateHandler } from './handlers/currentHeaterCoolerState'
+import {
+  get as getTargetHeaterCoolerStateHandler,
+  set as setTargetHeaterCoolerStateHandler,
+} from './handlers/targetHeaterCoolerState'
 
 let Service, Characteristic
 
@@ -60,66 +64,10 @@ class Thermostat {
       .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
       .on('get', getCurrentHeaterCoolerStateHandler(api, log, Characteristic))
 
-    // this is the mode the unit is set to
-    const getTargetHeaterCoolerStateHandler = readHandler(
-      'TargetHeaterCoolerState',
-      api.getMode,
-      log,
-      value => {
-        // static readonly AUTO = 0;
-        // static readonly HEAT = 1;
-        // static readonly COOL = 2;
-
-        switch (value) {
-          case 'cool':
-            return Characteristic.TargetHeaterCoolerState.COOL
-          case 'heat':
-            return Characteristic.TargetHeaterCoolerState.HEAT
-          case 'vent':
-            return Characteristic.TargetHeaterCoolerState.COOL
-          case 'dry':
-            return Characteristic.TargetHeaterCoolerState.COOL
-          case 'auto':
-            return Characteristic.TargetHeaterCoolerState.AUTO
-          default:
-            return Characteristic.TargetHeaterCoolerState.AUTO
-        }
-      }
-    )
-
-    const setTargetHeaterCoolerStateHandler = writeHandler(
-      'TargetHeaterCoolerState',
-      api.setMode,
-      log,
-      value => {
-        // static readonly AUTO = 0;
-        // static readonly HEAT = 1;
-        // static readonly COOL = 2;
-
-        switch (value) {
-          case Characteristic.TargetHeaterCoolerState.COOL:
-            return 'cool'
-          case Characteristic.TargetHeaterCoolerState.HEAT:
-            return 'heat'
-          case Characteristic.TargetHeaterCoolerState.AUTO:
-            return 'auto'
-          default:
-            return 'auto'
-          // throw `Unrecognized value ${value}`
-        }
-      }
-    )
-
     this.service
       .getCharacteristic(Characteristic.TargetHeaterCoolerState)
-      .on('get', getTargetHeaterCoolerStateHandler)
-      .on('set', setTargetHeaterCoolerStateHandler)
-
-    const getCurrentTemperatureHandler = readHandler(
-      'CurrentTemperature',
-      api.getActualTemperature,
-      log
-    )
+      .on('get', getTargetHeaterCoolerStateHandler(api, log, Characteristic))
+      .on('set', setTargetHeaterCoolerStateHandler(api, log, Characteristic))
 
     this.service
       .getCharacteristic(Characteristic.CurrentTemperature)
