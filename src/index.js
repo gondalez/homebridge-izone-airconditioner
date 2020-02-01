@@ -43,76 +43,76 @@ export default function(homebridge) {
   )
 }
 
-class Thermostat {
-  constructor(log, config) {
-    log('constructing')
+const Thermostat = (log, config) => {
+  log('config', config)
 
-    this.log = log
-    this.service = new Service.HeaterCooler(config.name)
+  const service = new Service.HeaterCooler(config.name)
+  const apiClient = api(config.url)
 
-    this.config = config
-    this.apiClient = api(config.url)
-
-    log('config', config)
-  }
-
-  getName(callback) {
-    this.log('getName')
+  const getName = callback => {
+    log('getName')
     const value = config.name
     callback(null, value)
   }
 
-  getServices() {
-    this.informationService = new Service.AccessoryInformation()
-    const api = this.apiClient
-    const log = this.log
+  return {
+    getServices: () => {
+      const informationService = new Service.AccessoryInformation()
 
-    this.informationService
-      .setCharacteristic(Characteristic.Manufacturer, 'iZone')
-      .setCharacteristic(Characteristic.Model, '-')
-      .setCharacteristic(Characteristic.SerialNumber, '-')
+      informationService
+        .setCharacteristic(Characteristic.Manufacturer, 'iZone')
+        .setCharacteristic(Characteristic.Model, '-')
+        .setCharacteristic(Characteristic.SerialNumber, '-')
 
-    this.service
-      .getCharacteristic(Characteristic.Active)
-      .on('get', getActiveHandler(api, log))
-      .on('set', setActiveHandler(api, log))
+      service
+        .getCharacteristic(Characteristic.Active)
+        .on('get', getActiveHandler(apiClient, log))
+        .on('set', setActiveHandler(apiClient, log))
 
-    this.service
-      .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
-      .on('get', getCurrentHeaterCoolerStateHandler(api, log, Characteristic))
+      service
+        .getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+        .on(
+          'get',
+          getCurrentHeaterCoolerStateHandler(apiClient, log, Characteristic)
+        )
 
-    this.service
-      .getCharacteristic(Characteristic.TargetHeaterCoolerState)
-      .on('get', getTargetHeaterCoolerStateHandler(api, log, Characteristic))
-      .on('set', setTargetHeaterCoolerStateHandler(api, log, Characteristic))
+      service
+        .getCharacteristic(Characteristic.TargetHeaterCoolerState)
+        .on(
+          'get',
+          getTargetHeaterCoolerStateHandler(apiClient, log, Characteristic)
+        )
+        .on(
+          'set',
+          setTargetHeaterCoolerStateHandler(apiClient, log, Characteristic)
+        )
 
-    this.service
-      .getCharacteristic(Characteristic.CurrentTemperature)
-      .on('get', getCurrentTemperatureHandler(api, log))
-      .setProps({ minStep: 0.1 })
+      service
+        .getCharacteristic(Characteristic.CurrentTemperature)
+        .on('get', getCurrentTemperatureHandler(apiClient, log))
+        .setProps({ minStep: 0.1 })
 
-    this.service
-      .getCharacteristic(Characteristic.CoolingThresholdTemperature)
-      .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
-      .on('get', getCoolingThresholdHandler(api, log))
-      .on('set', setCoolingThresholdHandler(api, log))
+      service
+        .getCharacteristic(Characteristic.CoolingThresholdTemperature)
+        .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
+        .on('get', getCoolingThresholdHandler(apiClient, log))
+        .on('set', setCoolingThresholdHandler(apiClient, log))
 
-    this.service
-      .getCharacteristic(Characteristic.HeatingThresholdTemperature)
-      .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
-      .on('get', getHeatingThresholdHandler(api, log))
-      .on('set', setHeatingThresholdHandler(api, log))
+      service
+        .getCharacteristic(Characteristic.HeatingThresholdTemperature)
+        .setProps({ minValue: 15, maxValue: 30, minStep: 1.0 })
+        .on('get', getHeatingThresholdHandler(apiClient, log))
+        .on('set', setHeatingThresholdHandler(apiClient, log))
 
-    this.service
-      .getCharacteristic(Characteristic.RotationSpeed)
-      .setProps({ minStep: 25, minValue: 0, maxValue: 100 })
-      .on('get', getRotationSpeedHandler(api, log))
-      .on('set', setRotationSpeedHandler(api, log))
+      service
+        .getCharacteristic(Characteristic.RotationSpeed)
+        .setProps({ minStep: 25, minValue: 0, maxValue: 100 })
+        .on('get', getRotationSpeedHandler(apiClient, log))
+        .on('set', setRotationSpeedHandler(apiClient, log))
 
-    this.service
-      .getCharacteristic(Characteristic.Name)
-      .on('get', this.getName.bind(this))
+      service.getCharacteristic(Characteristic.Name).on('get', getName)
 
-    return [this.informationService, this.service]
+      return [informationService, service]
+    },
   }
 }
