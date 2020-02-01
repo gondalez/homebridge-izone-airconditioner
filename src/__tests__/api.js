@@ -2,46 +2,41 @@ import api from '../api'
 import { MODES } from '../api'
 import systemSettingsResponse from '../__fixtures__/systemSettings'
 
-test('setPower on', () => {
+const testWriteAction = (doAction, expectedPath, expectedBody) => {
   const fetch = jest.fn()
   fetch.mockResolvedValueOnce({ ok: true })
   fetch.mockResolvedValueOnce({})
 
   const client = api('http://example.com/', fetch)
 
-  client.setPower(true)
+  doAction(client)
 
   expect(fetch.mock.calls).toEqual([
     [
-      'http://example.com/SystemON',
+      `http://example.com/${expectedPath}`,
       {
-        body: '{"SystemON":"on"}',
+        body: expectedBody,
         headers: { 'Content-Type': 'application/json' },
         method: 'post',
       },
     ],
   ])
+}
+
+test('setPower on', () => {
+  testWriteAction(
+    client => client.setPower(true),
+    'SystemON',
+    '{"SystemON":"on"}'
+  )
 })
 
 test('setPower off', () => {
-  const fetch = jest.fn()
-  fetch.mockResolvedValueOnce({ ok: true })
-  fetch.mockResolvedValueOnce({})
-
-  const client = api('http://example.com/', fetch)
-
-  client.setPower(false)
-
-  expect(fetch.mock.calls).toEqual([
-    [
-      'http://example.com/SystemON',
-      {
-        body: '{"SystemON":"off"}',
-        headers: { 'Content-Type': 'application/json' },
-        method: 'post',
-      },
-    ],
-  ])
+  testWriteAction(
+    client => client.setPower(false),
+    'SystemON',
+    '{"SystemON":"off"}'
+  )
 })
 
 test('setPower on error', () => {
@@ -57,45 +52,19 @@ test('setPower on error', () => {
 })
 
 test('setMode cool', () => {
-  const fetch = jest.fn()
-  fetch.mockResolvedValueOnce({ ok: true })
-  fetch.mockResolvedValueOnce({})
-
-  const client = api('http://example.com/', fetch)
-
-  client.setMode(MODES.cool)
-
-  expect(fetch.mock.calls).toEqual([
-    [
-      'http://example.com/SystemMODE',
-      {
-        body: '{"SystemMODE":"cool"}',
-        headers: { 'Content-Type': 'application/json' },
-        method: 'post',
-      },
-    ],
-  ])
+  testWriteAction(
+    client => client.setMode(MODES.cool),
+    'SystemMODE',
+    '{"SystemMODE":"cool"}'
+  )
 })
 
 test('setUnitSetpoint', () => {
-  const fetch = jest.fn()
-  fetch.mockResolvedValueOnce({ ok: true })
-  fetch.mockResolvedValueOnce({})
-
-  const client = api('http://example.com/', fetch)
-
-  client.setUnitSetpoint(24.0)
-
-  expect(fetch.mock.calls).toEqual([
-    [
-      'http://example.com/UnitSetpoint',
-      {
-        body: '{"UnitSetpoint":"24"}',
-        headers: { 'Content-Type': 'application/json' },
-        method: 'post',
-      },
-    ],
-  ])
+  testWriteAction(
+    client => client.setUnitSetpoint(24.0),
+    'UnitSetpoint',
+    '{"UnitSetpoint":"24"}'
+  )
 })
 
 test('getUnitSetpoint', () => {
