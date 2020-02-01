@@ -1,6 +1,6 @@
 {
   "name": "homebridge-izone-airconditioner",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Homebridge plugin for the iZone airconditioner controller.",
   "main": "dist/index.js",
   "scripts": {
