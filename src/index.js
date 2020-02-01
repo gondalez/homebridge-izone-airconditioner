@@ -10,6 +10,10 @@ import {
   get as getRotationSpeedHandler,
   set as setRotationSpeedHandler,
 } from './handlers/rotationSpeed'
+import {
+  get as getActiveHandler,
+  set as setActiveHandler,
+} from './handlers/active'
 
 let Service, Characteristic
 
@@ -60,8 +64,8 @@ class Thermostat {
 
     this.service
       .getCharacteristic(Characteristic.Active)
-      .on('get', readHandler('Active', api.getPower, log))
-      .on('set', writeHandler('Active', api.setPower, log))
+      .on('get', getActiveHandler(api, log))
+      .on('set', setActiveHandler(api, log))
 
     // TODO: extract handlers into ./handlers/** and test
 
