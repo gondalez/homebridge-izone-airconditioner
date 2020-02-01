@@ -1,9 +1,6 @@
 import { get, set } from '../../handlers/rotationSpeed'
 import { genericTestRead, genericTestWrite } from '../../handlers/testHelpers'
 
-const readMethod = 'getFanSpeed'
-const writeMethod = 'setFanSpeed'
-
 const testRead = (apiReturns, expected) =>
   genericTestRead('getFanSpeed', get, apiReturns, expected)
 const testWrite = (rawValue, expectedApiValue, expectedCallback) =>
