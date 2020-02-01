@@ -2,6 +2,10 @@ import api from '../api'
 import { MODES } from '../api'
 import systemSettingsResponse from '../__fixtures__/systemSettings'
 
+test('getPower', () => {
+  testRead(client => client.getPower(), false)
+})
+
 test('setPower on', () => {
   testWrite(client => client.setPower(true), 'SystemON', '{"SystemON":"on"}')
 })
@@ -36,6 +40,18 @@ test('getActualTemperature', () => {
 
 test('getMode', () => {
   testRead(client => client.getMode(), MODES.cool)
+})
+
+test('getFanSpeed', () => {
+  testRead(client => client.getFanSpeed(), 'medium')
+})
+
+test('setFanSpeed med', () => {
+  testWrite(
+    client => client.setFanSpeed('med'),
+    'SystemFAN',
+    '{"SystemFAN":"med"}'
+  )
 })
 
 test('error handling', () => {
