@@ -5,6 +5,7 @@ import {
   get as getTargetHeaterCoolerStateHandler,
   set as setTargetHeaterCoolerStateHandler,
 } from './handlers/targetHeaterCoolerState'
+import { get as getCurrentTemperatureHandler } from './handlers/currentTemperature'
 
 let Service, Characteristic
 
@@ -71,7 +72,7 @@ class Thermostat {
 
     this.service
       .getCharacteristic(Characteristic.CurrentTemperature)
-      .on('get', getCurrentTemperatureHandler)
+      .on('get', getCurrentTemperatureHandler(api, log))
       .setProps({ minStep: 0.1 })
 
     this.service
