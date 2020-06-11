@@ -32,9 +32,9 @@
   },
   "homepage": "https://github.com/gondalez/homebridge-izone-airconditioner#readme",
   "devDependencies": {
-    "@babel/cli": "^7.8.3",
-    "@babel/core": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
     "babel-jest": "^25.1.0",
     "jest": "^25.1.0"
   },
