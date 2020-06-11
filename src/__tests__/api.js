@@ -28,7 +28,7 @@ test('getUnitSetpoint', () =>
   testRead(client => client.getUnitSetpoint(), 25.0))
 
 test('getActualTemperature', () =>
-  testRead(client => client.getActualTemperature(), 29.0))
+  testRead(client => client.getActualTemperature(), 26.0))
 
 test('getMode', () => testRead(client => client.getMode(), MODES.cool))
 
