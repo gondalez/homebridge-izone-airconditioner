@@ -17,7 +17,7 @@ export default {
   Tag1: 'System Name',
   CtrlZone: 15,
   RAS: 'RAS',
-  Temp: '26.0',
+  Temp: '0.0',
   Setpoint: '25.0',
   Supply: '29.0',
   UnitType: 'Panasonic',

@@ -1,6 +1,14 @@
 import api from '../api'
 import { MODES } from '../api'
 import systemSettingsResponse from '../__fixtures__/systemSettings'
+import {
+  zones1_4Response,
+  zones5_8Response,
+  zones9_12Response,
+  zones1_4ResponseNoSensor,
+  zones5_8ResponseNoSensor,
+  zones9_12ResponseNoSensor,
+} from '../__fixtures__/zones'
 
 test('getPower', () => testRead(client => client.getPower(), false))
 
@@ -30,19 +38,49 @@ test('getUnitSetpoint', () =>
 test('getActualTemperature', () => {
   const fetch = jest.fn()
   fetch.mockResolvedValueOnce({ ok: true, json: () => systemSettingsResponse })
+  fetch.mockResolvedValueOnce({ ok: true, json: () => zones1_4Response })
+  fetch.mockResolvedValueOnce({ ok: true, json: () => zones5_8Response })
+  fetch.mockResolvedValueOnce({ ok: true, json: () => zones9_12Response })
 
   const client = api('http://example.com/', fetch)
 
   const promise = client.getActualTemperature().then(result => {
-    expect(result).toEqual(26.0)
+    expect(result).toEqual(20.324999333333334) // avg of all non-zero temps
   })
 
   expect(fetch.mock.calls).toEqual([
     ['http://example.com/SystemSettings'],
+    ['http://example.com/Zones1_4'],
+    ['http://example.com/Zones5_8'],
+    ['http://example.com/Zones9_12'],
   ])
 
   return promise
 })
+
+test('getActualTemperature (no sensors)', () => {
+  const fetch = jest.fn()
+  fetch.mockResolvedValueOnce({ ok: true, json: () => systemSettingsResponse })
+  fetch.mockResolvedValueOnce({ ok: true, json: () => zones1_4ResponseNoSensor })
+  fetch.mockResolvedValueOnce({ ok: true, json: () => zones1_4ResponseNoSensor })
+  fetch.mockResolvedValueOnce({ ok: true, json: () => zones9_12ResponseNoSensor })
+
+  const client = api('http://example.com/', fetch)
+
+  const promise = client.getActualTemperature().then(result => {
+    expect(result).toEqual(0)
+  })
+
+  expect(fetch.mock.calls).toEqual([
+    ['http://example.com/SystemSettings'],
+    ['http://example.com/Zones1_4'],
+    ['http://example.com/Zones5_8'],
+    ['http://example.com/Zones9_12'],
+  ])
+
+  return promise
+})
+
 
 test('getMode', () => testRead(client => client.getMode(), MODES.cool))
 

@@ -1,5 +1,6 @@
 import nodeFetch from 'node-fetch'
 import URI from 'urijs'
+import { flow, flattenDeep, reject, sum } from 'lodash/fp'
 
 export const MODES = {
   cool: 'cool',
@@ -21,6 +22,7 @@ export default function(rawUrl, fetch = nodeFetch) {
   const readFloatAttribute = buildReadFloatAttribute(fetch)
   const readStringAttribute = buildReadStringAttribute(fetch)
   const readOnOffAttribute = buildReadOnOffAttribute(fetch)
+  const getTemps = zones => zones.map(zone => parseFloat(zone.Temp))
 
   return {
     setPower: value =>
@@ -35,7 +37,12 @@ export default function(rawUrl, fetch = nodeFetch) {
     setFanSpeed: value => postJson(`${url}SystemFAN`, { SystemFAN: value }),
     getFanSpeed: () => readStringAttribute(`${url}SystemSettings`, 'SysFan'),
     getActualTemperature: () =>
-      readFloatAttribute(`${url}SystemSettings`, 'Temp'),
+      Promise.all([
+        readFloatAttribute(`${url}SystemSettings`, 'Temp'),
+        getJson(fetch, `${url}Zones1_4`).then(getTemps),
+        getJson(fetch, `${url}Zones5_8`).then(getTemps),
+        getJson(fetch, `${url}Zones9_12`).then(getTemps),
+      ]).then((...temperatures) => getAverageTemperature(temperatures)),
     getPowerAndMode: () =>
       Promise.all([
         readOnOffAttribute(`${url}SystemSettings`, 'SysOn'),
@@ -53,11 +60,9 @@ function checkStatus(res) {
   }
 }
 
-const readAttribute = (fetch, url, attribute) =>
-  fetch(url)
-    .then(checkStatus)
-    .then(res => res.json())
-    .then(parsed => parsed[attribute])
+const getJson = (fetch, url) => fetch(url).then(checkStatus).then(res => res.json())
+
+const readAttribute = (fetch, url, attribute) => getJson(fetch, url).then(data => data[attribute])
 
 const buildReadFloatAttribute = fetch => (url, attribute) =>
   readAttribute(fetch, url, attribute).then(value => parseFloat(value))
@@ -76,3 +81,13 @@ const buildPostJson = fetch => (url, body) =>
   })
     .then(checkStatus)
     .then(_res => true)
+
+const extractTemperatures = flow(flattenDeep, reject(val => val == 0))
+
+const getAverageTemperature = rawTemperatures => {
+  const temperatures = extractTemperatures(rawTemperatures)
+
+  if (temperatures.length === 0) return 0
+
+  return sum(temperatures) / temperatures.length
+}

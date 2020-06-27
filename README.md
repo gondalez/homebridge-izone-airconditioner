@@ -14,13 +14,13 @@ Add the following to config.json:
       "reportSetpointAsCurrentTemperature": false
     }
 
-Use `reportSetpointAsCurrentTemperature` if you see 0.0 as the current temperature. This happens when your iZone controller returns 0.0 as the "Supply" temperature, as does mine. Setting this option tells the plugin to show the last set temperature as the current temperature. I am emailing iZone to see if this is a bug or misconfiguration.
+Use `reportSetpointAsCurrentTemperature` if you see 0.0 as the current temperature. This happens when your iZone controller is letting the airconditioner manage the temperatures. Setting this option tells the plugin to show the last set temperature as the current temperature. If you would like an accurate measurement I suggest configuring your iZone controller to manage the temperature. Adding zone and return air sensors also helps with this.
 
 ## Limits
 
 The controller is assumed to have a static lan IP address. I suggest doing this via your router's DHCP settings.
 
-The detected temperature is based on the "Supply" temperature, but the iZone controller I was using always returned 0.0. So Homekit will report 0.0 as the detected temperature.
+The detected temperature is based on the average of all active temperature sensors. This can vary depending on the control mode (AC unit, master sensor, or zone sensors) of your iZone system and whether you have temperature sensors installed for the zones.
 
 It is not possible to set the mode to "Vent" or "Dry". This is a Homekit limitation.
 
