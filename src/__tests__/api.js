@@ -27,8 +27,22 @@ test('setUnitSetpoint', () =>
 test('getUnitSetpoint', () =>
   testRead(client => client.getUnitSetpoint(), 25.0))
 
-test('getActualTemperature', () =>
-  testRead(client => client.getActualTemperature(), 26.0))
+test('getActualTemperature', () => {
+  const fetch = jest.fn()
+  fetch.mockResolvedValueOnce({ ok: true, json: () => systemSettingsResponse })
+
+  const client = api('http://example.com/', fetch)
+
+  const promise = client.getActualTemperature().then(result => {
+    expect(result).toEqual(26.0)
+  })
+
+  expect(fetch.mock.calls).toEqual([
+    ['http://example.com/SystemSettings'],
+  ])
+
+  return promise
+})
 
 test('getMode', () => testRead(client => client.getMode(), MODES.cool))
 
