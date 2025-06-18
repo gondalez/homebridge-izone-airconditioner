@@ -1,6 +1,9 @@
 # Change Log
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
+## 2.0.0
+
+* Homebridge v2
 
 ## 1.4.2
 
