@@ -25,4 +25,4 @@ test('set 50', () => testWrite(50, 'medium'))
 test('set 75', () => testWrite(75, 'high'))
 test('set 100', () => testWrite(100, 'auto'))
 test('set unrecognized', () =>
-  expect(() => testWrite(999, 'auto')).toThrowError('Unrecognized value 999'))
+  expect(() => testWrite(999, 'auto')).toThrow('Unrecognized value 999'))
