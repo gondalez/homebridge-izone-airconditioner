@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf ./dist/ && babel src -d dist -s",
-    "test": "npm run build && jest --coverage --watch src/",
+    "test": "npm run build && jest --coverage src/",
+    "watch": "npm run build && jest --coverage --watch src/",
     "dev": "npm run build && homebridge -P .",
     "debug": "npm run build && DEBUG=* homebridge -D -P .",
     "prepare": "npm run build",
